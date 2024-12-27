@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title }}</title>
+  <script src="https://unpkg.com/htmx.org@2.0.3"></script>
+  <link rel="stylesheet" href="{{url_for('static', filename='css/output.css')}}">
+  <script>
+    window.addEventListener('load', function () {
+      const mapLinkButton = document.getElementById("copy-map-link")
+      const openMapLink = document.getElementById("open-map-link")
+      if ( mapLinkButton ) {
+        mapLinkButton.addEventListener("click", function(){
+          const mapLink = document.getElementById("result-input")
+          navigator.clipboard.writeText(mapLink.value);
+          showNotice("Maastokartta link copied to clipboard")
+        })
+      }
+
+      if (openMapLink) {
+        openMapLink.addEventListener("click", function() {
+          const mapLink = document.getElementById("result-input")
+          window.open(mapLink.value)
+        })
+      }
+    })
+
+    function showNotice(notice) {
+      const noticeContainer = document.getElementById("notice-container")
+      const noticeText= document.getElementById("notice-text")
+      noticeText.innerText = notice
+      noticeContainer.classList.remove("hidden")
+      setTimeout(function(){
+        noticeContainer.classList.add("hidden")
+      }, 3000)
+    }
+
+  </script>
+</head>
+<body>
+  <div>
+    <div class="container max-w-[800px] mb-20 mt-10">
+      <h1>Google Maps / Maastokartta converter</h1>
+      <p>Lorem ipsum dolor</p>
+      <hr class="my-10" />
+    </div>
+    <div class="container max-w-[800px]">
+      <form hx-post="/link-generator" hx-target="#result-input" hx-swap="outerHTML">
+        <div class="flex flex-col mb-4">
+          <label 
+            class="text-lg font-medium text-gray-900 mr-4 mb-2">
+            Google maps linkki
+          </label>
+          <input 
+            type="text" 
+            name="google-link"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+          />
+        </div>
+        <div class="grid grid-cols-2 gap-8 mb-4">
+          <div class="flex flex-col">
+            <label 
+              class="text-lg font-medium text-gray-900 mb-2">
+              Latitude
+            </label>
+            <input 
+              type="text" 
+              name="latitude" 
+              class="bg-gray-50 border border-gray-300 text-gray-900 w-full text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+            />
+          </div>
+          <div class="flex flex-col">
+            <label 
+              class="text-lg font-medium text-gray-900 mb-2">
+              Longitude
+            </label>
+            <input 
+              type="text" 
+              name="longitude"
+              class="bg-gray-50 border border-gray-300 text-gray-900 w-full text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+            />
+          </div>
+        </div>
+        <div class="mb-4">
+          <label class="text-lg font-medium text-gray-900 mb-2">Otsikko</label>
+          <input 
+            type="text" 
+            name="title" 
+            class="bg-gray-50 border border-gray-300 text-gray-900 w-full text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+          />
+        </div>
+        <div>
+          <label class="text-lg font-medium text-gray-900 mb-2">Kuvaus</label>
+          <textarea
+            rows="4"
+            name="description" 
+            class="bg-gray-50 border border-gray-300 text-gray-900 w-full text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+          ></textarea>
+        </div>
+        <button>generoi</button>
+      </form>
+    </div>
+    <div id="result" class="container my-6 max-w-[800px]">
+      <div class="flex">
+      <input id="result-input" type="text" class="w-full overflow-hidden border-t border-b border-l block truncate bg-gray-50 p-2 rounded-l-md" value="" />
+      <button id="copy-map-link" class="bg-gray-500 p-2 border-t border-b border-r text-white px-4">copy</button>
+      <button id="open-map-link" class="bg-gray-500 p-2 border-t border-b border-r rounded-r-md text-white px-4">open</button>
+      </div>
+    </div>
+    <div id="notice-container" class="hidden text-center w-full container max-w-[800px] rounded-md border py-2 px-4">
+      <p id="notice-text"></p>
+    </div>
+  </div>
+</body>
+</html>
