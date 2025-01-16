@@ -1,4 +1,5 @@
 import pyproj
+import re
 import requests
 from flask import Flask
 from flask import render_template
@@ -13,45 +14,65 @@ def index():
 @app.route('/link-generator', methods=['POST'])
 def generate():
     maastokarttaLink = ''
-    googleLink = request.form["google-link"]
-    if ( googleLink ) :
-        getGoogleShortMapLink(googleLink)
-    latitude = request.form["latitude"]
-    longitude = request.form["longitude"]
+    googleMapsShortUlr = request.form['google-link']
+    formLatitude = request.form["latitude"]
+    formLongitude = request.form["longitude"]
     title = request.form["title"]
     description = request.form["description"]
+
+    if (googleMapsShortUlr):
+        gShortUrl = getGoogleShortMapLink(googleMapsShortUlr)
+        if (gShortUrl):
+            generatedMaastokarttaLink = generateMaastokarttaLink(gShortUrl['northing'], gShortUrl['easting'], title, description)
+            maastokarttaLink = generatedMaastokarttaLink
     
-    if ( latitude and longitude ):
-        easting, northing = convertLatLong("{:.8}".format(latitude), "{:.8}".format(longitude))
-        maastokarttaLink = f"https://asiointi.maanmittauslaitos.fi/karttapaikka/?lang=fi&share=customMarker&n={northing}&e={easting}&title={title}&desc={description}&zoom=10&layers=W3siaWQiOjIsIm9wYWNpdHkiOjEwMH1d-z"
-        return f'<input id="result-input" type="text" class="w-full overflow-hidden border-t border-b border-l block truncate bg-gray-50 p-2 rounded-l-md" value="{maastokarttaLink}" />'
+    if ( formLatitude and formLongitude ):
+        try:
+            latitude = validateFloat(formLatitude)
+            longitude = validateFloat(formLongitude)
+            if ( latitude and longitude ): 
+                convertedLatLong = convertLatLong(latitude, longitude)
+                generatedMaastokarttaLink = generateMaastokarttaLink(convertedLatLong['northing'], convertedLatLong['easting'], title, description)
+                maastokarttaLink = generatedMaastokarttaLink
+        except ValueError:
+            maastokarttaLink = ''
 
-    return ''
+    return f'<input id="result-input" type="text" class="w-full overflow-hidden border-t border-b border-l block truncate bg-gray-50 p-2 rounded-l-md" value="{maastokarttaLink}" />'
         
+def validateFloat(input: str):
+    try:
+        float_value = float(input)
+        return float_value
+    except ValueError:
+        return False
 
+
+# Google maps does not like spamming from same IP address but we still get the cordinates
 def getGoogleShortMapLink(shortUrl):
     res = requests.get(shortUrl, allow_redirects=True)
-    print(res.url)
 
-    # coords_pattern = r"@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)"
-    # match = re.search(coords_pattern, res.url)
-    # if match:
-    #     latitude, longitude = match.groups()
-    #     print(f"Latitude: {latitude}, Longitude: {longitude}")
+    # Resolve google places 
+    googlePlaceLongitudePattern = r'!3d-?\d+\.\d+'
+    googlePlaceLatitudePattern = r'!4d-?\d+\.\d+'
+    googleLong = re.findall(googlePlaceLongitudePattern , res.url)
+    googleLat = re.findall(googlePlaceLatitudePattern , res.url)
+    if (googleLat and googleLong):
+        convertedLatLong = convertLatLong(googleLong[0][3:], googleLat[0][3:])
+        return convertedLatLong 
+
+    # Resolve direct links
+    gSearchLongPattern = r'\/search\/-?\d+\.\d+'
+    gSearchLatPattern = r',%2B-?\d+\.\d+'
+    gSearchLong = re.findall(gSearchLongPattern, res.url)
+    gSearchLat = re.findall(gSearchLatPattern, res.url)
+
+    if ( gSearchLong and gSearchLat):
+        convertedLatLong = convertLatLong(gSearchLong[0][8:], gSearchLat[0][4:])
+        return convertedLatLong 
+
+    return False
 
 
-    # data = res.text
-    # pattern = r"window\.ES5DGURL\s*=\s*'([^']+)';"
-    # # Search for the pattern in the HTML content
-    # match = re.search(pattern, res.text)
-    # 
-    # if match:
-    #     es5dgurl = match.group(1)
-    #     print("Extracted ES5DGURL:", es5dgurl)
-    # else:
-    #     print("ES5DGURL not found in the HTML content")
-    #     print(res.url)
-    #
 def convertLatLong(lat, lon):
     wgs84 = pyproj.CRS("EPSG:4326")  # WGS84: Latitude/Longitude EPSG:3857
     etrs_tm35fin = pyproj.CRS("EPSG:3067")  # ETRS-TM35FIN: Easting/Northing
@@ -60,14 +81,12 @@ def convertLatLong(lat, lon):
     transformer = pyproj.Transformer.from_crs(wgs84, etrs_tm35fin, always_xy=True)
     
     # Transform the coordinates from WGS84 (lat, lon) to ETRS-TM35FIN (easting, northing)
-    northing, easting = transformer.transform(lon, lat)
-    return {"{:.3f}".format(easting), "{:.3f}".format(northing)}
+    easting, northing = transformer.transform(lon, lat)
+    return {'easting': "{:.3f}".format(easting), 'northing': "{:.3f}".format(northing)}
 
-def generateMaastokarttaLink(northing, easting, title = '',description = ''):
-    if (northing or easting):
-        maastokarttaLink = f"https://asiointi.maanmittauslaitos.fi/karttapaikka/?lang=fi&share=customMarker&n={northing}&e={easting}&title={title}&desc={description}&zoom=10&layers=W3siaWQiOjIsIm9wYWNpdHkiOjEwMH1d-z"
-        return maastokarttaLink
-    return False
+def generateMaastokarttaLink(northing: str, easting: str, title = '',description = ''):
+    maastokarttaLink = f"https://asiointi.maanmittauslaitos.fi/karttapaikka/?lang=fi&share=customMarker&n={northing}&e={easting}&title={title}&desc={description}&zoom=10&layers=W3siaWQiOjIsIm9wYWNpdHkiOjEwMH1d-z"
+    return maastokarttaLink
 
 
 
