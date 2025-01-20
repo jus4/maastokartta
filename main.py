@@ -14,13 +14,14 @@ def index():
 @app.route('/link-generator', methods=['POST'])
 def generate():
     maastokarttaLink = ''
+    useGoogleShortUrl = request.form.get('use-google-short-url', None)
     googleMapsShortUlr = request.form['google-link']
     formLatitude = request.form["latitude"]
     formLongitude = request.form["longitude"]
     title = request.form["title"]
     description = request.form["description"]
 
-    if (googleMapsShortUlr):
+    if (googleMapsShortUlr and useGoogleShortUrl):
         gShortUrl = getGoogleShortMapLink(googleMapsShortUlr)
         if (gShortUrl):
             generatedMaastokarttaLink = generateMaastokarttaLink(gShortUrl['northing'], gShortUrl['easting'], title, description)
