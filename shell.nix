@@ -7,12 +7,9 @@ in pkgs.mkShell {
   packages = [
     (pkgs.python3.withPackages (python-pkgs: with python-pkgs; [
       flask
-      pandas
+      gunicorn
       pyproj
-      geopandas
       requests
-      beautifulsoup4
-      types-beautifulsoup4
       pip
     ]))
 
