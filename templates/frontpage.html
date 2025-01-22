@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Maastokartta converter">
   <title>{{ title }}</title>
-  <script src="https://unpkg.com/htmx.org@2.0.3"></script>
   <link rel="stylesheet" href="{{url_for('static', filename='css/output.css')}}">
-  <script src="{{url_for('static', filename='js/main.js')}}"></script>
 </head>
 <body>
   <div>
@@ -16,7 +15,7 @@
       WGS84 system is widely used in google maps and in all global map services.<b>This service only works with locations inside Finland</b></p>
       <br>
       <ul class="space-y-1 list-disc list-inside">
-        <li>Choose to use either latitude /longitude or google maps link</li>
+        <li>Choose to use either latitude, longitude or google maps link</li>
         <li>Add additional information heading and description</li>
         <li>Hit generate and open or copy the generated link</li>
       </ul>
@@ -40,13 +39,14 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
           />
         </div>
-        <div id="cordinates-latitude-longitude" class="grid grid-cols-2 gap-8 mb-4">
+        <div id="cordinates-latitude-longitude" class="grid grid-cols-1 md:grid-cols-2 md:gap-8 gap-4 mb-4">
           <div class="flex flex-col">
             <label 
-              class="text-lg font-medium text-gray-900 mb-2">
+              class="text-lg font-medium text-gray-900" for="latitude" >
               Latitude
             </label>
             <input 
+              id="latitude"
               type="text" 
               name="latitude" 
               class="bg-gray-50 border border-gray-300 text-gray-900 w-full text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
@@ -54,10 +54,11 @@
           </div>
           <div class="flex flex-col">
             <label 
-              class="text-lg font-medium text-gray-900 mb-2">
+              class="text-lg font-medium text-gray-900" for="longitude">
               Longitude
             </label>
             <input 
+              id="longitude"
               type="text" 
               name="longitude"
               class="bg-gray-50 border border-gray-300 text-gray-900 w-full text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
@@ -65,16 +66,18 @@
           </div>
         </div>
         <div class="mb-4">
-          <label class="text-lg font-medium text-gray-900 mb-2">Heading</label>
-          <input 
+          <label class="text-lg font-medium text-gray-900 mb-2" for="heading">Heading</label>
+          <input
+            id="heading"
             type="text" 
             name="title" 
             class="bg-gray-50 border border-gray-300 text-gray-900 w-full text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
           />
         </div>
         <div>
-          <label class="text-lg font-medium text-gray-900 mb-2">Description</label>
+          <label class="text-lg font-medium text-gray-900 mb-2" for="description">Description</label>
           <textarea
+            id="description"
             rows="4"
             name="description" 
             class="bg-gray-50 border border-gray-300 text-gray-900 w-full text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
@@ -85,7 +88,7 @@
     </div>
     <div id="result" class="container my-6 max-w-[800px]">
       <div class="flex">
-      <input id="result-input" type="text" class="w-full overflow-hidden border-t border-b border-l block truncate bg-gray-50 p-2 rounded-l-md" value="" />
+      <input aria-label="result" id="result-input" type="text" class="w-full overflow-hidden border-t border-b border-l block truncate bg-gray-50 p-2 rounded-l-md" value="" />
       <button id="copy-map-link" class="bg-gray-500 hover:bg-gray-700 p-2 border-t border-b border-r text-white px-4">copy</button>
       <button id="open-map-link" class="bg-gray-500 hover:bg-gray-700 p-2 border-t border-b border-r rounded-r-md text-white px-4">open</button>
       </div>
@@ -94,5 +97,7 @@
       <p id="notice-text"></p>
     </div>
   </div>
+  <script src="{{url_for('static', filename='js/main.js')}}"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.3"></script>
 </body>
 </html>
