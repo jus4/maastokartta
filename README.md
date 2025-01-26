@@ -7,3 +7,4 @@ Convert Google maps links and latitude / longitude WGS84 to Finnish ETRS-TM35FIN
 - pyproj
 - tailwindcss for styles 
 - HTMX
+
