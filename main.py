@@ -3,7 +3,7 @@ import re
 import requests
 from flask import Flask
 from flask import render_template
-from flask import request
+from flask import request, make_response
 
 app = Flask(__name__)
 
@@ -38,7 +38,13 @@ def generate():
         except ValueError:
             maastokarttaLink = ''
 
-    return f'<input id="result-input" type="text" class="w-full overflow-hidden border-t border-b border-l block truncate bg-gray-50 p-2 rounded-l-md" value="{maastokarttaLink}" />'
+
+    html = f'<input id="result-input" type="text" class="w-full overflow-hidden border-t border-b border-l block truncate bg-gray-50 p-2 rounded-l-md" value="{maastokarttaLink}" />'
+    response = make_response(html)
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
         
 def validateFloat(input: str):
     try:
