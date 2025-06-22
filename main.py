@@ -23,6 +23,7 @@ def generate():
 
     if (googleMapsShortUlr and useGoogleShortUrl):
         gShortUrl = getGoogleShortMapLink(googleMapsShortUlr)
+        print(gShortUrl)
         if (gShortUrl):
             generatedMaastokarttaLink = generateMaastokarttaLink(gShortUrl['northing'], gShortUrl['easting'], title, description)
             maastokarttaLink = generatedMaastokarttaLink
@@ -38,13 +39,11 @@ def generate():
         except ValueError:
             maastokarttaLink = ''
 
+    if ( maastokarttaLink == ''):
 
+        return "Failed to parse location", 400
+    
     return f'<input id="result-input" type="text" class="w-full overflow-hidden border-t border-b border-l block truncate bg-gray-50 p-2 rounded-l-md" value="{maastokarttaLink}" />'
-    # response = make_response(html)
-    # response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
-    # response.headers["Pragma"] = "no-cache"
-    # response.headers["Expires"] = "0"
-    # return response
         
 def validateFloat(input: str):
     try:
@@ -54,7 +53,7 @@ def validateFloat(input: str):
         return False
 
 
-# Google maps does not like spamming from same IP address but we still get the cordinates
+# Google maps does not like spamming from same IP address but we still get the coordinates
 def getGoogleShortMapLink(shortUrl):
     res = requests.get(shortUrl, allow_redirects=True)
 

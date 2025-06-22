@@ -6,7 +6,12 @@ module.exports = {
       center: true,
       padding: '2rem'
     },
-    extend: {},
+    extend: {
+      colors: {
+        warning: 'red',
+        white: 'white'
+      }
+    },
   },
   plugins: [],
 }
